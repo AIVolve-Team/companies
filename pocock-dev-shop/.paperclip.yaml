@@ -1,0 +1,45 @@
+# ATTENZIONE (surfaced qui, non nella issue originale): il ticket P1 chiedeva
+# ".paperclip.yaml con agenti e gerarchia" — ma R1 (#170) ha verificato che nel catalogo
+# reale questo file NON dichiara mai agenti né gerarchia: quelle vivono in reportsTo dentro
+# ogni AGENTS.md. Il sidecar dichiara solo override per-agente (adapter/modello/env). Lo
+# scheletro sotto segue il fatto verificato, non l'assunzione del ticket.
+
+schema: paperclip/v1
+agents:
+  cto:
+    adapter:
+      type: claude_local
+      config:
+        model: claude-opus-4-6
+  staff-engineer:
+    adapter:
+      type: claude_local
+      config:
+        model: claude-sonnet-4-6
+    inputs:
+      env:
+        GH_TOKEN: { kind: secret, requirement: optional }
+  code-reviewer:
+    adapter:
+      type: claude_local
+      config:
+        model: claude-sonnet-4-6
+  release-engineer:
+    adapter:
+      type: claude_local
+      config:
+        model: claude-sonnet-4-6
+    inputs:
+      env:
+        GH_TOKEN: { kind: secret, requirement: required }  # push + apre/aggiorna la PR
+  qa-engineer:
+    adapter:
+      type: claude_local
+      config:
+        model: claude-sonnet-4-6
+
+# NON qui: la modalità workspace (isolated_workspace / strategy: git_worktree, decisa in R6)
+# non è un campo di .paperclip.yaml — è una impostazione di PROGETTO Paperclip
+# (execution-workspace-policy, configurata nella UI/API del progetto, non nel company
+# package). Va scritta in S1 come passo di setup del progetto, non come YAML da versionare
+# qui. Altra cosa saltata fuori guardando la carta invece di parlarne a voce.
