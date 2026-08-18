@@ -45,10 +45,18 @@ Two honest possibilities beyond the simple case:
 - **The failure touches files from several sub-issues.** Send it back to each responsible Staff
   Engineer, in parallel, each with the part of the failure that concerns them. Do not pick one and
   hope.
-- **The failure is in files no sub-issue in this batch touched.** Then the batch did not cause it —
-  either the base branch was already red, or the merge itself broke something the individual branches
-  did not. A merge-caused failure is the Release Engineer's; a base-branch failure is nobody's here.
-  Say which it is.
+- **The failure is in files no sub-issue in this batch touched.** Then the batch did not cause it, and
+  neither case goes to a Staff Engineer:
+  - **The merge broke it** — the failing files are untouched by any single branch but the merge commit
+    combined them badly. That is the Release Engineer's. Reassign the batch to them with the report,
+    exactly as you would hand back a pass, but saying plainly that this is a merge defect and not a
+    green gate.
+  - **The base branch was already red** — the same check fails on the base branch with none of this
+    batch merged in. Nobody in this company owns that. Stop the batch and ask the human, with the
+    interaction in step 6, rather than sending the failure to someone who cannot fix it.
+
+  Verify which one it is before you route it: run the failing check on the base branch. Do not guess
+  from the file list.
 
 # 4. SEND IT BACK
 
@@ -81,14 +89,11 @@ likely engineer, and do not fall back on a heuristic to keep things moving.
 
 Ask with a real interaction, not a comment — a comment leaves nobody woken and nothing waiting:
 
-```
-POST /api/issues/{issueId}/interactions
-{
-  "kind": "ask_user_questions",
-  "resolverPolicy": "board_only",
-  ...the failing check, its output, the candidate sub-issues, and why the evidence does not separate them
-}
-```
+Create it with `POST /api/issues/{issueId}/interactions`, `kind: "ask_user_questions"` and
+`resolverPolicy: "board_only"`. Put in the questions everything the human needs to decide without
+opening a terminal: the failing check and the exact command, its real output, each candidate sub-issue
+with the engineer behind it, and the reason the evidence does not separate them. Offer the candidates
+as the options, so answering is a choice and not an essay.
 
 `board_only` is deliberate: this question is for the human, and no agent in this company may answer it
 on their behalf.

@@ -65,3 +65,5 @@ Skills are partitioned so no two agents hold the same tool: `tdd` to the Staff E
 `code-review` to the Code Reviewer, `resolving-merge-conflicts` to the Release Engineer. The CTO
 and the QA Engineer hold none by choice — scheduling and quality gating have no counterpart in the
 referenced catalog, and their prompts carry that work instead.
+
+Built for [Paperclip](https://github.com/paperclipai/paperclip) against the [Agent Companies spec](https://agentcompanies.io/specification), referencing engineering skills from [mattpocock/skills](https://github.com/mattpocock/skills)

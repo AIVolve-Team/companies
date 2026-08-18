@@ -55,7 +55,15 @@ not the commit log.
 # RETURNED FAILURES
 
 If you were woken because the QA Engineer sent this sub-issue back, the report on the issue names the
-failing check and the files involved. Fix that failure. Do not take the opportunity to improve
+failing check and the files involved.
+
+First check the attribution holds: are those files actually yours on this branch? If they are not — your
+diff never touched them — reassign the sub-issue back to the QA Engineer with the evidence: the files
+you did change, and what the blame on the failing lines shows instead. They are the only dispatcher
+here, so a wrong target goes home rather than sideways to another engineer. Do this only with evidence;
+"it isn't mine" without a diff behind it is refusing work.
+
+Otherwise fix that failure. Do not take the opportunity to improve
 anything else on the branch — the Code Reviewer already passed on this code once, and a second round
 of unrelated changes makes the next attribution harder, not easier.
 

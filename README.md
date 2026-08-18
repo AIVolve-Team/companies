@@ -1,6 +1,6 @@
 # 🏢 Paperclip Companies
 
-> **Deploy an entire AI workforce in minutes** — 16 pre-built companies, 440+ specialized agents, and 500+ battle-tested skills. From security auditors to game studios, from scientific research labs to full-stack dev shops. Plug in, power up, ship.
+> **Deploy an entire AI workforce in minutes** — 17 pre-built companies, 440+ specialized agents, and 500+ battle-tested skills. From security auditors to game studios, from scientific research labs to full-stack dev shops. Plug in, power up, ship.
 
 [![GitHub stars](https://img.shields.io/github/stars/paperclipai/companies?style=social)](https://github.com/paperclipai/companies)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -34,6 +34,7 @@ A growing catalog of ready-to-deploy agent companies for the [Paperclip](https:/
 | [Fullstack Forge](#fullstack-forge)                       | 49     | 66     | [claude-skills](https://github.com/jeffallan/claude-skills)                        |
 | [K-Dense Science Lab](#k-dense-science-lab)               | 54     | 177    | [claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills) |
 | [MiniMax Studio](#minimax-studio)                         | 5      | 10     | [MiniMax-AI/skills](https://github.com/MiniMax-AI/skills)                          |
+| [Pocock Dev Shop](#pocock-dev-shop)                       | 5      | 3      | [mattpocock/skills](https://github.com/mattpocock/skills)                          |
 | [Product Compass Consulting](#product-compass-consulting) | 48     | 65     | [pm-skills](https://github.com/phuryn/pm-skills)                                   |
 | [RedOak Review](#redoak-review)                           | 5      | 6      | [claude-code-workflows](https://github.com/OneRedOak/claude-code-workflows)        |
 | [TÂCHES Creative](#tâches-creative)                       | 6      | 35     | [taches-cc-resources](https://github.com/glittercowboy/taches-cc-resources)        |
@@ -206,6 +207,18 @@ Full-service digital studio that builds apps, creates visual effects, and produc
 > **Agents (5):** App Engineer, Ceo, Document Producer, Graphics Engineer, Mobile Engineer
 >
 > **Skills (10):** android-native-dev, frontend-dev, fullstack-dev, gif-sticker-maker, ios-application-dev, minimax-docx, minimax-pdf, minimax-xlsx, pptx-generator, shader-dev
+
+### [Pocock Dev Shop](./pocock-dev-shop)
+
+```bash
+npx companies.sh add AIVolve-Team/companies/pocock-dev-shop
+```
+
+Execution-only engineering company that takes already-decided tickets to a single reviewed pull request — CTO schedules, Staff Engineers build test-first, a Code Reviewer fixes in place, a Release Engineer merges incrementally, and a QA Engineer gates the batch. Built from [mattpocock/skills](https://github.com/mattpocock/skills).
+
+> **Agents (5):** Cto, Code Reviewer, Qa Engineer, Release Engineer, Staff Engineer
+>
+> **Skills (3):** code-review, resolving-merge-conflicts, tdd
 
 ### [Product Compass Consulting](./product-compass-consulting)
 

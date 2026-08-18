@@ -17,7 +17,7 @@ gate later fails, the merge commit has to point at one sub-issue and one enginee
 1. Make sure the batch branch exists. The first time a batch is merged, create it from the base branch
    the repo merges into, at its current head.
 2. Check out the batch branch and merge the sub-issue branch:
-   `git merge pocock/issue-<id> --no-edit`
+   `git merge pocock/issue-<identifier> --no-edit`
 3. **On conflict**, use the `resolving-merge-conflicts` skill. Its rules hold here: read why each side
    changed, preserve both intents where they are compatible, pick the side matching the batch's goal
    where they are not and note the trade-off, never invent behaviour, and never `--abort`. Always
@@ -39,39 +39,53 @@ Engineer will read backwards from when something fails later.
 naming the sub-issue merged, the merge commit, and every sub-issue the batch branch now carries. That
 list matters — the QA Engineer needs it to attribute a failure.
 
-# PART B — PUSH AND OPEN THE PULL REQUEST
+# PART B — PUSH, AND OPEN THE PULL REQUEST ONCE
 
 Only when the QA Engineer hands the batch back with a passing gate. You hold `GH_TOKEN`; use it here
 and nowhere else.
 
-Open the pull request under this guard, in this order, and stop at the first step that says no:
+**Push first, every time.** This part runs once per sub-issue that passes the gate, not once per
+batch, so the push is the step that repeats. Push the batch branch to the remote before you look at
+pull requests at all.
 
-1. **Is the batch branch ahead of the base branch?** If it has nothing the base does not, there is
+Then decide whether a pull request needs opening, in this order, stopping at the first step that says
+no:
+
+1. **Is the batch branch ahead of the base branch?** If it carries nothing the base does not, there is
    nothing to open. Stop.
-2. **Is there already an open pull request for this head?** If yes, you are done — pushing the branch
-   updates the existing pull request by itself. Do not open a second one, and do not try to "update"
-   it through any other action. Stop.
-3. **Only then open it.** Push the batch branch, then open exactly one pull request from it to the base
-   branch.
+2. **Is there already an open pull request for this head?** If yes, the push you just made has already
+   updated it — GitHub does that by itself. Do not open a second one, and do not go looking for an
+   "update pull request" action; there is none. Refresh the body as below, then stop.
+3. **Otherwise open it.** Exactly one pull request, from the batch branch to the base branch.
 
-That order is the whole guard. Checking for an existing pull request *after* trying to open one is how
-a second `gh pr create` fails on a batch's second pass.
+That order is the whole guard, and the order is the point: checking for an existing pull request only
+*after* trying to open one is how a second `gh pr create` fails on a batch's second pass.
 
-The pull request body lists every sub-issue in the batch with its identifier and title, and says the
-QA gate passed. A human merges it. You do not.
+## The body, rewritten on every pass
 
-## Close the sub-issues
+The body lists the sub-issues **currently merged into the batch branch** — not the whole batch, which
+may still have sub-issues in flight — and says the gate passed for those. When sub-issues are still
+outstanding, say so and name them.
 
-Once the pull request is open, close each sub-issue it carries: `PATCH /api/issues/{issueId}` with
-`status: "done"` and a comment linking the pull request.
+On a later pass, rewrite that list rather than appending to it. A pull request that reads as a
+finished batch while half of it is still being built is worse than one that says where it actually is.
 
-Close only the sub-issues actually in the batch branch. A sub-issue the CTO deferred is not closed by
-this pull request.
+A human merges it. You do not.
+
+## Close only what you shipped
+
+Close each sub-issue whose work is in the branch you just pushed and that is not closed already:
+`PATCH /api/issues/{issueId}` with `status: "done"` and a comment linking the pull request.
+
+Never close a sub-issue that is not in the branch — one the CTO deferred, or one still with a Staff
+Engineer. The pull request closes what it carries, nothing more.
 
 ## Record the pull request
 
-Create a `pull_request` work product on the batch's parent issue pointing at the pull request URL. A
-comment alone is not enough — the work product is the access path a human opens.
+The first time you open it, create a `pull_request` work product on the batch's parent issue pointing
+at the pull request URL. A comment alone is not enough — the work product is the access path a human
+opens, and the bundled `paperclip` skill requires one for an opened pull request. On later passes that
+work product already points at the same pull request; leave it alone.
 
 # IF YOU CANNOT PUSH
 

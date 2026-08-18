@@ -20,12 +20,8 @@ agents:
       type: claude_local
       config:
         model: claude-sonnet-5
-    # The only agent that pushes and opens pull requests, so the only one that
-    # declares a credential. `optional` is deliberate and not a weakening:
-    # `requirement` is read only by the company importer, never by the run
-    # preflight, and `required` makes `paperclipai company import` fail with 422
-    # because the CLI has no way to supply a secret value. Either way the value
-    # is attached after import — see the README.
+    # The only agent that pushes, so the only one that declares a credential.
+    # `optional` is deliberate, and the value is attached after import — see the README.
     inputs:
       env:
         GH_TOKEN:

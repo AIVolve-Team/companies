@@ -1,126 +1,71 @@
 # Pocock Dev Shop
 
-An **execution-only** engineering company for [Paperclip](https://github.com/paperclipai/paperclip),
-built to the [Agent Companies spec](https://agentcompanies.io/specification).
+> Execution-only engineering company that takes already-decided tickets to a single reviewed pull request — CTO schedules, Staff Engineers build test-first, a Code Reviewer fixes in place, a Release Engineer merges incrementally, and a QA Engineer gates the batch
 
-It takes tickets that someone else already decided and carries them to a single pull request a human
-merges. It never decides what to build. Discovery, specification, and ticket-writing happen outside
-this company, in a human-driven session — the skills that do that work are user-invoked and no agent
-can trigger them.
+> An [Agent Company](https://agentcompanies.io) built around [mattpocock/skills](https://github.com/mattpocock/skills) — engineering skills for test-driven development, two-axis code review, and merge-conflict resolution
 
-The five roles mirror an autonomous-implementation pipeline, and three of them are driven by
-referenced skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
+## What's Inside
 
-## Org chart
+> This is an [Agent Company](https://agentcompanies.io) package from [Paperclip](https://paperclip.ing)
 
-```
-                          CTO
-                           |
-     +---------------+-----+------+------------------+
-     |               |            |                  |
-Staff Engineer  Code Reviewer  Release Engineer  QA Engineer
-```
+| Content | Count |
+|---------|-------|
+| Agents | 5 |
+| Skills | 3 |
 
-Five agents, flat under the CTO, no CEO. The permissions a `ceo` role would unlock — exporting and
-importing the company itself — are deliberately human acts here.
+### Agents
 
-| Agent | Role | Model | Skill | Phase prompt |
-| --- | --- | --- | --- | --- |
-| CTO | `cto` | `claude-opus-5` | — | `plan-prompt.md` |
-| Staff Engineer | `engineer` | `claude-sonnet-5` | `tdd` | `implement-prompt.md` |
-| Code Reviewer | `engineer` | `claude-sonnet-5` | `code-review` | `review-prompt.md` |
-| Release Engineer | `devops` | `claude-sonnet-5` | `resolving-merge-conflicts` | `merge-prompt.md` |
-| QA Engineer | `qa` | `claude-sonnet-5` | — | `qa-prompt.md` |
+| Agent | Role | Reports To |
+|-------|------|------------|
+| CTO | CTO | — |
+| Code Reviewer | Engineer | cto |
+| QA Engineer | QA | cto |
+| Release Engineer | DevOps | cto |
+| Staff Engineer | Engineer | cto |
 
-Skills are partitioned so no two agents hold the same tool. The CTO and the QA Engineer hold none by
-choice: nothing in the referenced catalog covers batch scheduling or quality gating, and their
-prompts carry that work instead. The bundled `paperclip` skill is not declared anywhere — it is
-always available to every agent.
+### Skills
 
-## How work flows
+| Skill | Description | Source |
+|-------|-------------|--------|
+| code-review | Two-axis review of a diff against a fixed point — Standards and Spec — run as parallel sub-agents. | [github](https://github.com/mattpocock/skills/blob/9c9f36ccd3995266cd675468af71639c8dde1ec5/skills/engineering/code-review/SKILL.md) |
+| resolving-merge-conflicts | Resolve an in-progress merge or rebase by reading each side back to its intent, never inventing behaviour. | [github](https://github.com/mattpocock/skills/blob/9c9f36ccd3995266cd675468af71639c8dde1ec5/skills/engineering/resolving-merge-conflicts/SKILL.md) |
+| tdd | Test-driven development as a red-green loop that produces tests worth keeping — good tests, seams, anti-patterns. | [github](https://github.com/mattpocock/skills/blob/9c9f36ccd3995266cd675468af71639c8dde1ec5/skills/engineering/tdd/SKILL.md) |
 
-1. **CTO** receives a batch of tickets. It records the dependencies the tracker does not know, picks
-   what can run now, decomposes what is too large into parallel sub-issues, and gives each one a
-   derived branch name plus the single **batch branch** they all merge into.
-2. **Staff Engineer** implements one sub-issue on its own branch, test-first with `tdd`.
-3. **Code Reviewer** reviews that branch with `code-review` and **fixes findings in place**. There is
-   no review bounce in this company.
-4. **Release Engineer** merges that one branch into the batch branch, incrementally, resolving
-   conflicts with `resolving-merge-conflicts`.
-5. **QA Engineer** gates the batch branch — typecheck, tests, end-to-end. Pass goes back to the
-   Release Engineer to push and open **one** pull request; fail goes back to the responsible Staff
-   Engineer, identified from the merge commit that last touched the failing files.
+Every source is pinned to that one 40-character commit. Nothing is vendored or forked, and drift
+toward upstream is a deliberate act: bump the `commit` field in the stub, then re-run the import
+dry-run to confirm the file still loads at the new SHA.
 
-The QA Engineer is the only rework loop. Every other hand-off moves forward, and every hand-off is a
-reassignment — Paperclip wakes the new assignee by itself, so no agent has to nudge another.
-
-When a failure cannot honestly be attributed to one sub-issue, the QA Engineer stops the batch and
-asks the human with a `board_only` interaction rather than guessing an owner.
-
-## Agent identity and phase prompts
-
-Each agent directory holds two files:
-
-- `AGENTS.md` — identity: frontmatter (`name`, `title`, `reportsTo`, `role`, `skills`) plus the four
-  paragraphs of the catalog stamp (where work comes from, what you do and produce, who you hand off
-  to, what triggers you).
-- a colocated `*-prompt.md` — the procedure for that phase.
-
-The split is deliberate, and it only works because `AGENTS.md` **says explicitly** to read the prompt
-file, by relative path. Every file under `agents/<slug>/` is imported into the agent's managed
-instructions bundle and materialized on disk next to `AGENTS.md`, but only `AGENTS.md` reaches the
-system prompt. Paperclip mounts that directory read-only and tells the agent to resolve relative
-references from it — so `implement-prompt.md` resolves, and `$AGENT_HOME/implement-prompt.md` does
-not.
-
-Prompt names come from the sandcastle `parallel-planner-with-review` template
-(`plan`/`implement`/`review`/`merge`), so the lineage of each one is recognisable at a glance.
-`qa-prompt.md` has no counterpart there and was written for this company.
-
-## Referenced skills
-
-Each skill is a 15-line stub: frontmatter with a `github-file` source pinned to a **40-character
-commit SHA**, `usage: referenced`, and a one-line summary. Nothing is vendored or forked.
-
-At import the pin is validated — an unpinned ref is rejected, and a source carrying executable
-scripts is rejected outright. When an agent actually reads the skill, Paperclip fetches it live from
-`raw.githubusercontent.com` at the pinned commit, falling back to the stub only if that fetch fails.
-So the pin is the single point of freeze, and drift toward upstream is a deliberate act: bump the
-`commit` field, then re-run the import dry-run to confirm the file still loads at the new SHA.
-
-`diagnosing-bugs` is deliberately **excluded**. It is the one skill in this chain carrying a script
-(`scripts/hitl-loop.template.sh`), and Paperclip refuses to import an external skill whose inventory
-contains executables.
-
-## Getting started
-
-Import the company package. **The source is positional** — the `--from /path/to/company` form in this
-repo's `CONTRIBUTING.md` does not exist in the CLI:
+## Getting Started
 
 ```bash
-# preview first
+npx companies.sh add AIVolve-Team/companies/pocock-dev-shop
+```
+
+Or import a local checkout. **The source is positional** — the `--from /path/to/company` form shown
+in this repo's `CONTRIBUTING.md` is not implemented by the CLI:
+
+```bash
 npx paperclipai company import ./pocock-dev-shop \
   --target new --include company,agents,skills --dry-run
 
-# then for real
 npx paperclipai company import ./pocock-dev-shop \
   --target new --include company,agents,skills --yes
 ```
 
-Then three setup steps that do not live in the package:
+Then three setup steps that no company package can carry:
 
 1. **Worktree isolation.** The default `shared_workspace` policy gives parallel runs the same
    checkout, and this company runs sub-issues in parallel on purpose. Set the project's execution
    workspace policy to `git_worktree`. Paperclip also accepts a per-agent
-   `adapter.config.workspaceStrategy: { type: git_worktree }` if you would rather version it here
-   than set it per project.
+   `adapter.config.workspaceStrategy: { type: git_worktree }` if you would rather version it here than
+   set it per project.
 2. **`GH_TOKEN` on the Release Engineer only.** This one is not optional to do by hand. The package
    declares the input but cannot carry a value, and an input imported without a value leaves **no
    trace at all** on the agent — not an empty slot, not a placeholder. After a fresh import the
-   Release Engineer's configuration contains no `GH_TOKEN` key, and the company holds no secrets.
-   Create the secret and bind it to the Release Engineer yourself, from the UI or the secrets API,
-   scoped to the single repository the company is allowed to touch. Nothing pushes until you do,
-   and no other agent should ever be given a credential.
+   Release Engineer's configuration contains no `GH_TOKEN` key and the company holds no secrets.
+   Create the secret and bind it to the Release Engineer yourself, scoped to the single repository the
+   company is allowed to touch. Nothing pushes until you do, and no other agent should ever be given a
+   credential.
 
    The declaration says `requirement: optional`, which is deliberate. `requirement` is read only by
    the company importer and never by the run preflight, so `required` buys no protection at run
@@ -131,8 +76,58 @@ Then three setup steps that do not live in the package:
 3. **A dedicated host or `HOME`.** On macOS an agent sees the whole filesystem and every skill
    installed for the user, not just this company's — verified on a clean import: alongside its own
    `tdd`, the Staff Engineer listed a dozen skills from the operator's personal Claude home, and the
-   pre-run inventory counted 54 of them. Run the agents on a dedicated machine, or at minimum give
-   the adapter a dedicated `HOME`, so a run's transcript only ever shows skills that belong here.
+   pre-run inventory counted 54 of them. Run the agents on a dedicated machine, or at minimum give the
+   adapter a dedicated `HOME`, so a run's transcript only ever shows skills that belong here.
+
+## How work flows
+
+`COMPANY.md` has the authoritative account under **How Work Flows**. In short: the CTO schedules a
+batch onto derived branch names, each Staff Engineer implements one sub-issue test-first on its own
+branch, the Code Reviewer fixes what it finds in place, the Release Engineer merges that branch into
+the batch branch, and the QA Engineer gates the batch branch. Pass goes back to the Release Engineer
+to push and open one pull request; fail goes back to the Staff Engineer the merge history blames.
+
+The QA Engineer is the only rework loop. Every hand-off is a reassignment, which wakes the new
+assignee by itself, so no agent has to nudge another.
+
+Models follow the difficulty of the role: Opus for the CTO, who schedules and decomposes; Sonnet for
+the other four. `.paperclip.yaml` is the single place that records them.
+
+## Agent identity and phase prompts
+
+Each agent directory holds two files:
+
+- `AGENTS.md` — identity: frontmatter (`name`, `title`, `reportsTo`, `role`, `skills`) plus the
+  catalogue's stamp sections (where work comes from, what you do, what you produce, who you hand off
+  to, what triggers you).
+- a colocated `*-prompt.md` — the procedure for that phase.
+
+The split only works because `AGENTS.md` **says explicitly** to read the prompt file, by relative
+path. Every file under `agents/<slug>/` is imported into the agent's managed instructions bundle and
+materialized on disk next to `AGENTS.md`, but only `AGENTS.md` reaches the system prompt. Paperclip
+mounts that directory read-only and tells the agent to resolve relative references from it — so
+`implement-prompt.md` resolves, and `$AGENT_HOME/implement-prompt.md` does not.
+
+Prompt names come from the sandcastle `parallel-planner-with-review` template
+(`plan`/`implement`/`review`/`merge`), so the lineage of each one is recognisable at a glance.
+`qa-prompt.md` has no counterpart there and was written for this company.
+
+## Where this package departs from the catalogue
+
+- **`role:` in `AGENTS.md` frontmatter.** No other company in the catalogue sets it, but omitting it
+  normalizes every agent to `general`, and the literal default `"agent"` emitted by generators is
+  rejected outright with a 400. The importer does read `role` from frontmatter, and the accepted enum
+  is `ceo, cto, cmo, cfo, security, engineer, designer, pm, qa, devops, researcher, general` — hence
+  `cto` on the CTO, `qa` on the QA Engineer, `devops` on the Release Engineer.
+- **No `Exported from Paperclip` footer.** Every catalogue company has one because it was produced by
+  the exporter. This package was written by hand, and stamping an export line it never went through
+  would be claiming a provenance it does not have.
+- **No `images/org-chart.png`.** All 16 catalogue companies ship one, and Paperclip does render an org
+  chart — but for an imported company that render includes a synthetic `Organization` root plus the
+  two built-in agents (`Reflection Coach`, `Summarizer`) that Paperclip provisions in every company and
+  refuses to delete. Shipping it would show seven agents and a root that isn't in this package; drawing
+  a cleaner one by hand would forge an artifact that looks like tool output. The **Agents** table above
+  carries the same hierarchy in its `Reports To` column.
 
 ## Known rough edges
 
@@ -150,11 +145,11 @@ Then three setup steps that do not live in the package:
   `review-prompt.md` hands it to the review directly and says the missing file is expected.
 - **The CLI cannot import a package with a `required` env input at all.** Its import command has no
   flag for secret values, so `requirement: required` is unimportable from the terminal regardless of
-  which agent declares it. Only the UI import flow, or a direct API call carrying `secretValues`,
-  can satisfy one.
-- **`tdd` asks the user to confirm the seams under test.** There is no user inside an autonomous run,
-  so `implement-prompt.md` substitutes the ticket's acceptance criteria as the agreement and requires
-  the engineer to write the seams into the issue thread before the first test.
+  which agent declares it. Only the UI import flow, or a direct API call carrying `secretValues`, can
+  satisfy one — and an import that dies on that 422 leaves a half-created company behind.
+- **`diagnosing-bugs` is deliberately absent.** It is the one skill in this chain carrying a script
+  (`scripts/hitl-loop.template.sh`), and Paperclip refuses to import an external skill whose inventory
+  contains executables.
 
 ## References
 

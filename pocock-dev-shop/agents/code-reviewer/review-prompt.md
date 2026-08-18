@@ -16,8 +16,8 @@ merge-base between the sub-issue branch and the **batch branch** — the changes
 to contribute, and nothing the batch already carries.
 
 ```
-git diff pocock/batch-<id>...pocock/issue-<id>
-git log pocock/batch-<id>..pocock/issue-<id> --oneline
+git diff pocock/batch-<identifier>...pocock/issue-<identifier>
+git log pocock/batch-<identifier>..pocock/issue-<identifier> --oneline
 ```
 
 Confirm both refs resolve and the diff is non-empty before going further. An empty diff means the

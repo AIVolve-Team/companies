@@ -40,9 +40,11 @@ catch the behaviour breaking again.
 ## Who you hand off to
 
 - **Code Reviewer** — receives the sub-issue by reassignment once your branch is complete and green
+- **QA Engineer** — receives a failure back only when it was mis-attributed to you: the failing files
+  are not yours and you can show it. Bring the evidence; do not simply decline the work
 
-You never hand off to the Release Engineer or the QA Engineer directly, and you never merge your own
-branch anywhere.
+You never hand off to the Release Engineer, you never route a failure sideways to another Staff
+Engineer, and you never merge your own branch anywhere.
 
 ## What triggers you
 
