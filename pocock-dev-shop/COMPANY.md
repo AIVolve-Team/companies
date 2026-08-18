@@ -1,6 +1,6 @@
 ---
 name: Pocock Dev Shop
-description: Executor alternativo a `.sandcastle/` che implementa ticket già decisi da `to-tickets`, usando `tdd` e `code-review` di mattpocock/skills come strumenti dei ruoli sotto forma di skill Paperclip.
+description: Executor company that implements already-decided tickets — CTO schedules, Staff Engineers build test-first, a Code Reviewer fixes in place, a Release Engineer merges incrementally, and a QA Engineer gates the batch — driven by referenced skills from mattpocock/skills
 slug: pocock-dev-shop
 schema: agentcompanies/v1
 version: 0.1.0
@@ -8,52 +8,60 @@ license: MIT
 authors:
   - name: Simone
 goals:
-  - Eseguire in autonomia la fase implement→review→merge→qa di un batch di ticket già pianificato da to-tickets
-  - Restare un executor alternativo, non un sostituto della catena wayfinder→grilling→to-spec→to-tickets (G4, G1) — quella resta manuale, fuori da qui
-  - Isolare il codice fra run paralleli (worktree per branch), non solo l'assegnazione della issue
+  - Take a batch of already-planned tickets from implementation to a single reviewed pull request without human intervention
+  - Stay an executor only — never decide *what* to build, only *how* to execute it
+  - Keep every run isolated so parallel sub-issues cannot corrupt each other's working tree
 ---
 
-Pocock Dev Shop è un banco di lavoro personale: prende in carico un batch di sub-issue già
-decise altrove e le porta a una PR pronta per l'Human merge, senza mai decidere *cosa*
-costruire — solo *come* eseguirlo.
+Pocock Dev Shop is an execution-only engineering company. It receives tickets that someone else
+already decided — scoped, written up, and queued — and carries them to a pull request that a human
+merges. It never opens the question of what should be built.
+
+Everything upstream of implementation lives outside this company: discovery, specification, and
+ticket-writing happen in a human-driven session, because the skills that do that work are
+user-invoked and no agent can trigger them. What arrives here is a batch of tickets, and what
+leaves is one pull request per batch.
 
 ## Org chart
 
 ```
-                 CTO (radice, nessun reportsTo)
-                  |
-      +-----------+-----------+-----------+
-      |           |           |           |
+                          CTO
+                           |
+     +---------------+-----+------+------------------+
+     |               |            |                  |
 Staff Engineer  Code Reviewer  Release Engineer  QA Engineer
 ```
 
-5 agenti, tutti flat sotto CTO (nessun CEO — deciso in G2 amendment 2: i permessi che
-`role: ceo` sbloccherebbe, export/import company e bypass di creazione agenti, non servono
-qui perché l'export verso `paperclipai/companies` resta un atto umano).
+Five agents, flat under the CTO. There is deliberately no CEO: the permissions a `ceo` role would
+unlock — exporting and importing the company itself — are human acts here, not agent ones.
 
 ## How Work Flows
 
-1. **CTO** riceve il batch quando atterra su Paperclip (punto di ingresso). Rileva
-   dipendenze implicite che il tracker non conosce, sceglie il batch del giro, assegna
-   branch deterministici e decompone un ticket già assegnato in sub-task paralleli se serve.
-2. **Staff Engineer** implementa una sub-issue sul branch assegnato, in una worktree isolata.
-   Usa `tdd` per il ciclo red-green-refactor.
-3. **Code Reviewer** rientra sullo stesso branch dopo Staff Engineer. Usa `code-review` e
-   **corregge in loco** — nessun rimando a Staff Engineer per un semplice reject.
-4. **Release Engineer** fa merge incrementale del branch (appena pronto, un branch alla
-   volta) nel branch di batch — non "integration branch": nome deliberatamente diverso da
-   quello già usato in `.sandcastle/` per un meccanismo opposto (CONTEXT.md righe 194-200).
-5. **QA Engineer** fa da gate sul branch di batch (typecheck / test / e2e).
-   - Se passa → torna a **Release Engineer**, che fa push e apre/aggiorna la PR verso il
-     branch base, elencando le issue chiuse. Da lì la mano passa all'umano (Human merge).
-   - Se fallisce → rimanda a **Staff Engineer**, col proprio report come contesto.
+1. **CTO** is the entry point. A batch of tickets lands on the CTO, who reads dependencies the
+   tracker does not know about, picks what can run now, decomposes anything too large into
+   parallel sub-issues, and assigns each one a deterministic branch name. The CTO also names the
+   **batch branch** — the single branch every sub-issue eventually merges into.
+2. **Staff Engineer** implements one sub-issue on its own branch, in an isolated worktree, using
+   the `tdd` skill for the red → green loop. Hands off by reassigning the sub-issue to the Code
+   Reviewer.
+3. **Code Reviewer** reviews the same branch with the `code-review` skill and **fixes what it
+   finds in place**. Nothing is sent back to the Staff Engineer over ordinary review findings —
+   there is no bounce loop here. Hands off to the Release Engineer.
+4. **Release Engineer** merges that one branch into the batch branch — incrementally, one
+   sub-issue at a time, resolving conflicts with the `resolving-merge-conflicts` skill. Hands the
+   batch branch to the QA Engineer.
+5. **QA Engineer** is the only gate: typecheck, tests, and any end-to-end suite, run against the
+   batch branch.
+   - **Passes** → back to the Release Engineer, who pushes and opens the pull request (guarded so
+     a second open never fires), then the work is a human's to merge.
+   - **Fails** → back to the Staff Engineer responsible for the failure, identified from the merge
+     commit that last touched the failing files. Several Staff Engineers may be sent back in
+     parallel. If attribution is genuinely ambiguous, the QA Engineer stops and asks the human
+     rather than guessing.
 
-Fuori da questa company: tutta la catena a monte (`wayfinder`, `grilling`, `to-spec`,
-`to-tickets`) e `triage` — girano manualmente, in un terminale Claude Code vero, perché
-nessuna configurazione Paperclip invoca nativamente una skill `disable-model-invocation:
-true` (G4). I ticket arrivano qui già decisi.
+The QA Engineer is the single rework loop in this company. Every other hand-off moves forward.
 
----
-
-Prototipo — non genera nessuna company reale, non si importa. Scritto per il ticket P1
-della mappa wayfinder #169 e criticato in sessione con Simone.
+Skills are partitioned so no two agents hold the same tool: `tdd` to the Staff Engineer,
+`code-review` to the Code Reviewer, `resolving-merge-conflicts` to the Release Engineer. The CTO
+and the QA Engineer hold none by choice — scheduling and quality gating have no counterpart in the
+referenced catalog, and their prompts carry that work instead.

@@ -1,16 +1,15 @@
 ---
 name: tdd
-description: "Use when implementing any feature or bugfix, before writing implementation code"
+description: Test-driven development as a red-green loop that produces tests worth keeping — what a good test is, which seams to test at, and the anti-patterns that make a suite brittle
 metadata:
   sources:
     - kind: github-file
       repo: mattpocock/skills
-      path: skills/tdd/SKILL.md
-      commit: <PIN MANCANTE — SHA a 40 caratteri da mattpocock/skills, non ancora preso>
-      attribution: Matt Pocock
+      path: skills/engineering/tdd/SKILL.md
+      commit: 9c9f36ccd3995266cd675468af71639c8dde1ec5
+      attribution: mattpocock
       license: MIT
       usage: referenced
 ---
 
-RED-GREEN-REFACTOR: scrivi un test che fallisce, il minimo codice per farlo passare, poi
-rifattorizza. Nessun codice di produzione senza un test che fallisce prima.
+The red → green loop, plus the reference that makes it produce durable tests: behaviour through public interfaces, tests only at agreed seams, one vertical slice at a time.

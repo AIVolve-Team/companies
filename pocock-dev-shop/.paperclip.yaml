@@ -1,45 +1,38 @@
-# ATTENZIONE (surfaced qui, non nella issue originale): il ticket P1 chiedeva
-# ".paperclip.yaml con agenti e gerarchia" — ma R1 (#170) ha verificato che nel catalogo
-# reale questo file NON dichiara mai agenti né gerarchia: quelle vivono in reportsTo dentro
-# ogni AGENTS.md. Il sidecar dichiara solo override per-agente (adapter/modello/env). Lo
-# scheletro sotto segue il fatto verificato, non l'assunzione del ticket.
-
 schema: paperclip/v1
 agents:
   cto:
     adapter:
       type: claude_local
       config:
-        model: claude-opus-4-6
+        model: claude-opus-5
   staff-engineer:
     adapter:
       type: claude_local
       config:
-        model: claude-sonnet-4-6
-    inputs:
-      env:
-        GH_TOKEN: { kind: secret, requirement: optional }
+        model: claude-sonnet-5
   code-reviewer:
     adapter:
       type: claude_local
       config:
-        model: claude-sonnet-4-6
+        model: claude-sonnet-5
   release-engineer:
     adapter:
       type: claude_local
       config:
-        model: claude-sonnet-4-6
+        model: claude-sonnet-5
+    # The only agent that pushes and opens pull requests, so the only one that
+    # declares a credential. `optional` is deliberate and not a weakening:
+    # `requirement` is read only by the company importer, never by the run
+    # preflight, and `required` makes `paperclipai company import` fail with 422
+    # because the CLI has no way to supply a secret value. Either way the value
+    # is attached after import — see the README.
     inputs:
       env:
-        GH_TOKEN: { kind: secret, requirement: required }  # push + apre/aggiorna la PR
+        GH_TOKEN:
+          kind: secret
+          requirement: optional
   qa-engineer:
     adapter:
       type: claude_local
       config:
-        model: claude-sonnet-4-6
-
-# NON qui: la modalità workspace (isolated_workspace / strategy: git_worktree, decisa in R6)
-# non è un campo di .paperclip.yaml — è una impostazione di PROGETTO Paperclip
-# (execution-workspace-policy, configurata nella UI/API del progetto, non nel company
-# package). Va scritta in S1 come passo di setup del progetto, non come YAML da versionare
-# qui. Altra cosa saltata fuori guardando la carta invece di parlarne a voce.
+        model: claude-sonnet-5

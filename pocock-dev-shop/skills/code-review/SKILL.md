@@ -1,16 +1,15 @@
 ---
 name: code-review
-description: "Use when reviewing changes on a branch for standards and spec compliance"
+description: Two-axis review of a diff against a fixed point — Standards (does it follow this repo's documented standards, plus a Fowler smell baseline) and Spec (does it do what the originating ticket asked) — run as parallel sub-agents
 metadata:
   sources:
     - kind: github-file
       repo: mattpocock/skills
-      path: skills/code-review/SKILL.md
-      commit: <PIN MANCANTE — SHA a 40 caratteri da mattpocock/skills, non ancora preso>
-      attribution: Matt Pocock
+      path: skills/engineering/code-review/SKILL.md
+      commit: 9c9f36ccd3995266cd675468af71639c8dde1ec5
+      attribution: mattpocock
       license: MIT
       usage: referenced
 ---
 
-Rivedi le modifiche dal punto di divergenza lungo due assi — standard del repo e aderenza
-alla issue/PRD di origine — e correggi in loco dove serve.
+Reviews the diff between HEAD and a fixed point along two independent axes, Standards and Spec, each in its own sub-agent, then aggregates the findings.
